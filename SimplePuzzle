@@ -1,0 +1,26 @@
+// puzzle to find the sum of total numbers which are divisble by 3 or 5
+//  but their total sum does not exceed 10000
+
+pragma solidity 0.6.0;
+
+contract Puzzle{
+    
+   bytes32  salt = bytes32(int(54645644));
+   bytes32 commitment;   // commitment is the hash of the answer and the salt
+   
+   constructor (bytes32 _committment) public payable{
+       commitment = _committment;
+       
+   }
+   function createCommitment(uint _answer) public view  returns(bytes32){
+       return keccak256(abi.encodePacked(salt, _answer));
+       
+   }
+   
+   function guessAnswer(uint _Answer)public payable {
+       require(createCommitment(_Answer) == commitment, "wrong answer");
+       msg.sender.transfer(address(this).balance);
+   }
+   fallback () payable external{
+   }
+}
