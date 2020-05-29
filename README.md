@@ -1,3 +1,3 @@
 # Puzzle
 
- In this we have created a puzzle , who ever solve the puzzle can win the Prize
+ In this we have created a puzzle , who ever solve the puzzle will win the Prize
