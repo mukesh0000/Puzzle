@@ -1,0 +1,82 @@
+// puzzle is find sum of even number which occur in fibonacci series
+// and sum should not be greater than 100000
+
+pragma solidity 0.6.0;
+
+contract puzzle{
+    
+    uint  public constant Guess_Duration = 2 minutes; //  4-5 days
+    uint public constant Reveal_Duration = 2 minutes; // 1-2 days
+    uint public Guess_DeadLine;
+    uint public Reveal_DeadLine;
+    uint public Total_Prize;
+    
+    address public Creater;
+    address[] public Winners;
+    
+    mapping(address => bool) public claimed;
+    mapping(address => bytes32) public commitments;
+    
+    bytes32 public Salt  = bytes32(int(454545));
+    
+   
+    
+    constructor(bytes32 _commitment) public payable{
+        Creater = msg.sender;
+        commitments[Creater] = _commitment;
+        Total_Prize += msg.value;
+        Guess_DeadLine = block.number + Guess_Duration;
+        Reveal_DeadLine = Guess_DeadLine + Reveal_Duration;
+    }
+    
+    function createCommit(address user, uint answer) public view returns(bytes32){
+        
+        return keccak256(abi.encodePacked(user, answer,Salt ));
+        
+    }
+    function GuessAnswer(bytes32 _commitment) public{
+        require(block.number < Guess_DeadLine);
+        require(msg.sender != Creater);
+        commitments[msg.sender] = _commitment;
+    }
+    function reveal(uint answer) public returns(string memory){
+        require(block.number > Guess_DeadLine);
+        require(block.number < Reveal_DeadLine);
+        
+        require(createCommit(msg.sender, answer) == commitments[msg.sender]);
+        require(createCommit(Creater, answer) == commitments[Creater]);
+        
+        require(!Iswinner(msg.sender)); // to check he is already a winner or not 
+        Winners.push(msg.sender);
+        
+        return " congratulatin you are one of the winner";
+        
+    }
+    
+    function ClaimPrize() public {
+        require(block.number > Reveal_DeadLine);
+        require(claimed[msg.sender] == false); // to check  he/she has claimed the prize before or not
+        require(Iswinner(msg.sender));
+        
+        uint payout = Total_Prize / Winners.length;
+        claimed[msg.sender] = true;
+        msg.sender.transfer(payout);
+        
+    }
+    function Iswinner(address user) public view returns(bool){
+        bool winner = false;
+        
+        for(uint i = 0; i <Winners.length; i++){
+            if(Winners[i] == user){
+                winner = true;
+                break;
+            }
+        }
+        
+        return winner;
+    }
+    
+    fallback () payable external{
+        Total_Prize += msg.value;
+    }
+}
