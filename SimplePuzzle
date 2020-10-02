@@ -8,19 +8,19 @@ contract Puzzle{
    bytes32  salt = bytes32(int(54645644));
    bytes32 commitment;   // commitment is the hash of the answer and the salt
    
-   constructor (bytes32 _committment) public payable{
+   constructor (bytes32 _committment) private{
        commitment = _committment;
        
    }
-   function createCommitment(uint _answer) public view  returns(bytes32){
+   function createCommitment(uint _answer) private view  returns(bytes32){
        return keccak256(abi.encodePacked(salt, _answer));
        
    }
    
-   function guessAnswer(uint _Answer)public payable {
+   function guessAnswer(uint _Answer)private {
        require(createCommitment(_Answer) == commitment, "wrong answer");
        msg.sender.transfer(address(this).balance);
    }
-   fallback () payable external{
+   fallback () external{
    }
 }
