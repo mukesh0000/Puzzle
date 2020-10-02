@@ -5,23 +5,23 @@ pragma solidity 0.6.0;
 
 contract puzzle{
     
-    uint  public constant Guess_Duration = 2 minutes; //  4-5 days
-    uint public constant Reveal_Duration = 2 minutes; // 1-2 days
-    uint public Guess_DeadLine;
-    uint public Reveal_DeadLine;
-    uint public Total_Prize;
+    uint  private constant Guess_Duration = 2 minutes; //  4-5 days
+    uint private constant Reveal_Duration = 2 minutes; // 1-2 days
+    uint private Guess_DeadLine;
+    uint private Reveal_DeadLine;
+    uint private Total_Prize;
     
-    address public Creater;
-    address[] public Winners;
+    address private Creater;
+    address[] private Winners;
     
-    mapping(address => bool) public claimed;
-    mapping(address => bytes32) public commitments;
+    mapping(address => bool) private claimed;
+    mapping(address => bytes32) private commitments;
     
-    bytes32 public Salt  = bytes32(int(454545));
+    bytes32 private Salt  = bytes32(int(454545));
     
    
     
-    constructor(bytes32 _commitment) public payable{
+    constructor(bytes32 _commitment) private payable{
         Creater = msg.sender;
         commitments[Creater] = _commitment;
         Total_Prize += msg.value;
@@ -29,7 +29,7 @@ contract puzzle{
         Reveal_DeadLine = Guess_DeadLine + Reveal_Duration;
     }
     
-    function createCommit(address user, uint answer) public view returns(bytes32){
+    function createCommit(address user, uint answer) private view returns(bytes32){
         
         return keccak256(abi.encodePacked(user, answer,Salt ));
         
@@ -39,7 +39,7 @@ contract puzzle{
         require(msg.sender != Creater);
         commitments[msg.sender] = _commitment;
     }
-    function reveal(uint answer) public returns(string memory){
+    function reveal(uint answer) private returns(string memory){
         require(block.number > Guess_DeadLine);
         require(block.number < Reveal_DeadLine);
         
@@ -53,7 +53,7 @@ contract puzzle{
         
     }
     
-    function ClaimPrize() public {
+    function ClaimPrize() private {
         require(block.number > Reveal_DeadLine);
         require(claimed[msg.sender] == false); // to check  he/she has claimed the prize before or not
         require(Iswinner(msg.sender));
@@ -63,7 +63,7 @@ contract puzzle{
         msg.sender.transfer(payout);
         
     }
-    function Iswinner(address user) public view returns(bool){
+    function Iswinner(address user) private view returns(bool){
         bool winner = false;
         
         for(uint i = 0; i <Winners.length; i++){
